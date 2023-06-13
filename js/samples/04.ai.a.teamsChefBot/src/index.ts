@@ -12,7 +12,8 @@ import {
     CloudAdapter,
     ConfigurationBotFrameworkAuthentication,
     ConfigurationServiceClientCredentialFactory,
-    MemoryStorage
+    MemoryStorage,
+    StoreItems
 } from 'botbuilder';
 
 const botFrameworkAuthentication = new ConfigurationBotFrameworkAuthentication(
@@ -82,7 +83,15 @@ const promptManager = new DefaultPromptManager(path.join(__dirname, '../src/prom
 
 // Define storage and application
 //const storage = new MemoryStorage();
-const storage = new BlobsStorage(process.env.STORAGE_CONNECTION_STRING, process.env.STORAGE_CONTAINER);
+
+class LoggingBlobStogate extends BlobsStorage {
+    public write(changes: StoreItems): Promise<void> {
+        console.log(JSON.stringify(changes, null, 2))
+        return super.write(changes);
+    }
+}
+
+const storage = new LoggingBlobStogate(process.env.STORAGE_CONNECTION_STRING, process.env.STORAGE_CONTAINER);
 const app = new Application<ApplicationTurnState>({
     storage,
     ai: {

@@ -13,6 +13,7 @@ import {
     ConfigurationBotFrameworkAuthentication,
     ConfigurationServiceClientCredentialFactory,
     MemoryStorage,
+    StoreItem,
     StoreItems
 } from 'botbuilder';
 
@@ -91,7 +92,22 @@ class LoggingBlobStogate extends BlobsStorage {
     }
 }
 
-const storage = new LoggingBlobStogate(process.env.STORAGE_CONNECTION_STRING, process.env.STORAGE_CONTAINER);
+class LastWriterWinsStore extends LoggingBlobStogate {
+    public write(changes: StoreItems): Promise<void> {
+        // Remove any eTags
+        for (const key in changes) {
+            const item = changes[key] as StoreItem;
+            if (item.eTag) {
+                delete item.eTag;
+            }
+        }
+
+        return super.write(changes);
+    }
+}
+
+//const storage = new LoggingBlobStogate(process.env.STORAGE_CONNECTION_STRING, process.env.STORAGE_CONTAINER);
+const storage = new LastWriterWinsStore(process.env.STORAGE_CONNECTION_STRING, process.env.STORAGE_CONTAINER);
 const app = new Application<ApplicationTurnState>({
     storage,
     ai: {

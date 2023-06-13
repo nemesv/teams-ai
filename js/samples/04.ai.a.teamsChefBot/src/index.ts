@@ -62,6 +62,7 @@ server.listen(process.env.port || process.env.PORT || 3978, () => {
 });
 
 import { Application, ConversationHistory, DefaultPromptManager, DefaultTurnState, OpenAIModerator, OpenAIPlanner, AI } from '@microsoft/botbuilder-m365';
+import { BlobsStorage } from 'botbuilder-azure-blobs';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ConversationState {}
@@ -80,7 +81,8 @@ const moderator = new OpenAIModerator({
 const promptManager = new DefaultPromptManager(path.join(__dirname, '../src/prompts'));
 
 // Define storage and application
-const storage = new MemoryStorage();
+//const storage = new MemoryStorage();
+const storage = new BlobsStorage(process.env.STORAGE_CONNECTION_STRING, process.env.STORAGE_CONTAINER);
 const app = new Application<ApplicationTurnState>({
     storage,
     ai: {
@@ -89,6 +91,8 @@ const app = new Application<ApplicationTurnState>({
         promptManager,
         prompt: 'chat',
         history: {
+            maxTurns: 5,
+            maxTokens: 1500,
             assistantHistoryType: 'text'
         }
     }

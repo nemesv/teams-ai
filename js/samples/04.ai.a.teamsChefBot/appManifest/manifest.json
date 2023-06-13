@@ -5,7 +5,7 @@
     "id": "${{TEAMS_APP_ID}}",
     "packageName": "com.package.name",
     "name": {
-        "short": "TeamsChef-${{TEAMSFX_ENV}}",
+        "short": "TeamsChefRepro-${{TEAMSFX_ENV}}",
         "full": "Teams Developer Chef"
     },
     "developer": {
